@@ -383,6 +383,28 @@
     .review-item dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
     .review-empty { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
     .footer-note { margin: 15px 4px 0; color: var(--muted); text-align: center; font-size: 11px; }
+    .topic-options { margin: 22px 0 0; padding: 0; border: 0; }
+    .topic-options legend { margin-bottom: 11px; font-size: 14px; font-weight: 800; }
+    .topic-grid { display: grid; gap: 10px; }
+    .topic-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 15px;
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease;
+    }
+    .topic-option:hover { border-color: var(--accent); }
+    .topic-option.is-selected { border-color: var(--accent); background: var(--accent-soft); }
+    .topic-option:focus-within { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .topic-option input { width: 17px; height: 17px; margin: 0; accent-color: var(--accent); }
+    .topic-copy { display: grid; gap: 3px; }
+    .topic-copy strong { font-size: 14px; }
+    .topic-copy span { color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .start-action { justify-content: flex-start; margin-top: 21px; }
     .sparkle { position: absolute; z-index: -1; color: var(--accent); opacity: .45; animation: twinkle 2.8s ease-in-out infinite; }
     .sparkle.one { top: 105px; left: -23px; font-size: 20px; }
     .sparkle.two { right: -15px; bottom: 115px; font-size: 25px; animation-delay: .9s; }
@@ -418,10 +440,23 @@
     </div>
 
     <section class="card" aria-live="polite">
-      <div id="quizView">
+      <div id="startView">
+        <p class="eyebrow">Mission briefing · Pick your destination</p>
+        <h1>What would you like to explore?</h1>
+        <p class="intro">Choose a space topic for your quiz, or take the full tour across the cosmos. 🌌</p>
+        <fieldset class="topic-options">
+          <legend>Choose a topic</legend>
+          <div class="topic-grid" id="topicOptions"></div>
+        </fieldset>
+        <div class="action-row start-action">
+          <button class="primary" id="startButton" type="button">Start quiz <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+
+      <div id="quizView" class="hidden">
         <p class="eyebrow">Mission briefing · Earth to the stars</p>
         <h1>Ready to explore<br>the cosmos?</h1>
-        <p class="intro">Ten quick questions, one giant universe. Test your space smarts and see how far your knowledge can take you. 🌌</p>
+        <p class="intro" id="quizIntro">Ten quick questions, one giant universe. Test your space smarts and see how far your knowledge can take you. 🌌</p>
 
         <div class="meta-row">
           <div class="mission-readout">
@@ -455,7 +490,7 @@
       </div>
 
       <div class="result hidden" id="resultView">
-        <p class="eyebrow">Mission complete</p>
+        <p class="eyebrow" id="resultEyebrow">Mission complete</p>
         <span class="result-emoji" id="resultEmoji" aria-hidden="true">🌍</span>
         <h2 id="resultTitle">Cosmic explorer!</h2>
         <div class="result-score" id="resultScore">0 / 10</div>
@@ -465,7 +500,7 @@
           <ol class="review-list" id="missedAnswerList"></ol>
           <p class="review-empty" id="reviewEmpty" role="status">No missed answers this time!</p>
         </section>
-        <button class="primary" id="restartButton" type="button">Explore again <span aria-hidden="true">↻</span></button>
+        <button class="primary" id="restartButton" type="button">Choose another topic <span aria-hidden="true">↻</span></button>
       </div>
     </section>
     <p class="footer-note">Made for curious minds, under the same stars ✨</p>
@@ -477,64 +512,87 @@
         question: "Which planet is known as the Red Planet?",
         answers: ["Venus", "Mars", "Jupiter", "Mercury"],
         correct: 1,
+        topic: "planets",
         fact: "Mars looks rusty red because iron-rich dust covers much of its surface."
       },
       {
         question: "What is the name of the galaxy that contains our Solar System?",
         answers: ["Andromeda", "Whirlpool Galaxy", "The Milky Way", "Sombrero Galaxy"],
         correct: 2,
+        topic: "stars-galaxies",
         fact: "Our Solar System lives in the Milky Way, a barred spiral galaxy."
       },
       {
         question: "Which planet has the most prominent ring system?",
         answers: ["Saturn", "Neptune", "Earth", "Mars"],
         correct: 0,
+        topic: "planets",
         fact: "Saturn's spectacular rings are made mostly of chunks of ice and rock."
       },
       {
         question: "What is the closest star to Earth?",
         answers: ["Sirius", "Proxima Centauri", "The Sun", "Polaris"],
         correct: 2,
+        topic: "stars-galaxies",
         fact: "The Sun is our nearest star—and the center of our Solar System."
       },
       {
         question: "What force keeps planets in orbit around the Sun?",
         answers: ["Magnetism", "Gravity", "Friction", "Solar wind"],
         correct: 1,
+        topic: "space-science",
         fact: "The Sun's gravity holds the planets in their sweeping orbits."
       },
       {
         question: "Which planet is the largest in our Solar System?",
         answers: ["Saturn", "Earth", "Neptune", "Jupiter"],
         correct: 3,
+        topic: "planets",
         fact: "Jupiter is so large that more than 1,300 Earths could fit inside it."
       },
       {
         question: "What is the name of the first human to walk on the Moon?",
         answers: ["Yuri Gagarin", "Buzz Aldrin", "Neil Armstrong", "John Glenn"],
         correct: 2,
+        topic: "space-exploration",
         fact: "Neil Armstrong took humanity's first steps on the Moon in 1969."
       },
       {
         question: "Which planet is famous for its Great Red Spot?",
         answers: ["Jupiter", "Mars", "Uranus", "Venus"],
         correct: 0,
+        topic: "planets",
         fact: "Jupiter's Great Red Spot is a giant storm that has raged for centuries."
       },
       {
         question: "What do we call a rocky object that enters Earth's atmosphere and glows?",
         answers: ["Asteroid", "Meteor", "Comet", "Moonlet"],
         correct: 1,
+        topic: "space-science",
         fact: "A meteor is the bright streak from space rock heating up in our atmosphere."
       },
       {
         question: "Which planet rotates on its side compared with most others?",
         answers: ["Mercury", "Venus", "Uranus", "Saturn"],
         correct: 2,
+        topic: "planets",
         fact: "Uranus is tilted about 98 degrees, making it look like it rolls around the Sun."
       }
     ];
 
+    const topics = {
+      all: { name: "All topics", description: "A complete tour of the cosmos" },
+      planets: { name: "Planets", description: "Worlds, rings, and giant storms" },
+      "stars-galaxies": { name: "Stars & galaxies", description: "Our nearest star and the Milky Way" },
+      "space-science": { name: "Space science", description: "Gravity and meteors" },
+      "space-exploration": { name: "Space exploration", description: "Humanity's first steps on the Moon" }
+    };
+
+    function getQuestionsForTopic(topic) {
+      return topic === "all" ? questions : questions.filter(item => item.topic === topic);
+    }
+
+    const startView = document.getElementById("startView");
     const quizView = document.getElementById("quizView");
     const resultView = document.getElementById("resultView");
     const questionCounter = document.getElementById("questionCounter");
@@ -548,32 +606,78 @@
     const feedbackEmoji = document.getElementById("feedbackEmoji");
     const feedbackText = document.getElementById("feedbackText");
     const nextButton = document.getElementById("nextButton");
+    const startButton = document.getElementById("startButton");
+    const topicOptions = document.getElementById("topicOptions");
     let currentQuestion = 0;
     let score = 0;
     let answered = false;
     let missedAnswers = [];
-    let runQuestions = [];
+    let activeTopic = "all";
+    let quizQuestions = questions;
 
-    function shuffleQuestions() {
-      const previousRun = runQuestions;
-      runQuestions = [...questions];
-      for (let index = runQuestions.length - 1; index > 0; index--) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
-        [runQuestions[index], runQuestions[swapIndex]] = [runQuestions[swapIndex], runQuestions[index]];
+    function shuffleQuestions(questionList, previousRun = [], random = Math.random) {
+      const shuffledQuestions = [...questionList];
+      for (let index = shuffledQuestions.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [shuffledQuestions[index], shuffledQuestions[swapIndex]] =
+          [shuffledQuestions[swapIndex], shuffledQuestions[index]];
       }
-      if (runQuestions.length > 1 && runQuestions.every((question, index) => question === previousRun[index])) {
-        [runQuestions[0], runQuestions[1]] = [runQuestions[1], runQuestions[0]];
+      if (shuffledQuestions.length > 1 && shuffledQuestions.every((question, index) => question === previousRun[index])) {
+        [shuffledQuestions[0], shuffledQuestions[1]] = [shuffledQuestions[1], shuffledQuestions[0]];
       }
+      return shuffledQuestions;
+    }
+
+    function renderTopicOptions() {
+      Object.entries(topics).forEach(([value, topic]) => {
+        const count = value === "all" ? questions.length : questions.filter(item => item.topic === value).length;
+        const label = document.createElement("label");
+        label.className = `topic-option${value === "all" ? " is-selected" : ""}`;
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "topic";
+        radio.value = value;
+        radio.checked = value === "all";
+        radio.addEventListener("change", () => {
+          topicOptions.querySelectorAll(".topic-option").forEach(option => option.classList.remove("is-selected"));
+          label.classList.add("is-selected");
+        });
+        const copy = document.createElement("span");
+        copy.className = "topic-copy";
+        const name = document.createElement("strong");
+        name.textContent = topic.name;
+        const details = document.createElement("span");
+        details.textContent = `${topic.description} · ${count} ${count === 1 ? "question" : "questions"}`;
+        copy.append(name, details);
+        label.append(radio, copy);
+        topicOptions.append(label);
+      });
+    }
+
+    function startQuiz() {
+      activeTopic = document.querySelector('input[name="topic"]:checked').value;
+      quizQuestions = shuffleQuestions(getQuestionsForTopic(activeTopic), quizQuestions);
+      currentQuestion = 0;
+      score = 0;
+      missedAnswers = [];
+      progressTrack.setAttribute("aria-valuemax", quizQuestions.length);
+      document.getElementById("quizIntro").textContent =
+        `${quizQuestions.length} quick ${quizQuestions.length === 1 ? "question" : "questions"} on ${topics[activeTopic].name}. Test your space smarts and see how far your knowledge can take you. 🌌`;
+      startView.classList.add("hidden");
+      resultView.classList.add("hidden");
+      quizView.classList.remove("hidden");
+      renderQuestion();
+      answersElement.querySelector(".answer").focus();
     }
 
     function renderQuestion() {
-      const item = runQuestions[currentQuestion];
+      const item = quizQuestions[currentQuestion];
       answered = false;
-      questionCounter.textContent = `Question ${currentQuestion + 1} of ${runQuestions.length}`;
+      questionCounter.textContent = `Question ${currentQuestion + 1} of ${quizQuestions.length}`;
       questionNumber.textContent = `QUESTION ${String(currentQuestion + 1).padStart(2, "0")}`;
-      scoreCounter.textContent = `${score} / ${runQuestions.length}`;
+      scoreCounter.textContent = `${score} / ${quizQuestions.length}`;
       questionText.textContent = item.question;
-      progressFill.style.width = `${(currentQuestion / runQuestions.length) * 100}%`;
+      progressFill.style.width = `${(currentQuestion / quizQuestions.length) * 100}%`;
       progressTrack.setAttribute("aria-valuenow", currentQuestion);
       feedback.className = "feedback";
       feedbackEmoji.textContent = "";
@@ -605,7 +709,7 @@
     function selectAnswer(selected, selectedButton) {
       if (answered) return;
       answered = true;
-      const item = runQuestions[currentQuestion];
+      const item = quizQuestions[currentQuestion];
       const choices = [...answersElement.querySelectorAll(".answer")];
       choices.forEach(button => { button.disabled = true; });
 
@@ -633,9 +737,9 @@
         feedbackText.textContent = `Not quite! ${item.fact}`;
       }
 
-      scoreCounter.textContent = `${score} / ${runQuestions.length}`;
+      scoreCounter.textContent = `${score} / ${quizQuestions.length}`;
       nextButton.disabled = false;
-      nextButton.innerHTML = currentQuestion === runQuestions.length - 1
+      nextButton.innerHTML = currentQuestion === quizQuestions.length - 1
         ? 'See my results <span aria-hidden="true">✨</span>'
         : 'Next question <span aria-hidden="true">→</span>';
     }
@@ -644,8 +748,9 @@
       quizView.classList.add("hidden");
       resultView.classList.remove("hidden");
       progressFill.style.width = "100%";
-      progressTrack.setAttribute("aria-valuenow", runQuestions.length);
-      document.getElementById("resultScore").textContent = `${score} / ${runQuestions.length}`;
+      progressTrack.setAttribute("aria-valuenow", quizQuestions.length);
+      document.getElementById("resultEyebrow").textContent = `Mission complete · ${topics[activeTopic].name}`;
+      document.getElementById("resultScore").textContent = `${score} / ${quizQuestions.length}`;
       const missedAnswerList = document.getElementById("missedAnswerList");
       const reviewEmpty = document.getElementById("reviewEmpty");
       missedAnswerList.replaceChildren();
@@ -675,13 +780,14 @@
       });
 
       let emoji, title, copy;
-      if (score === runQuestions.length) {
+      const scoreRatio = score / quizQuestions.length;
+      if (score === quizQuestions.length) {
         emoji = "🏆"; title = "Out-of-this-world!";
         copy = "A perfect mission! You're a true space expert. The cosmos has no secrets from you.";
-      } else if (score >= 7) {
+      } else if (scoreRatio >= 0.7) {
         emoji = "🪐"; title = "Stellar explorer!";
         copy = "Fantastic work! Your space knowledge is shining bright across the galaxy.";
-      } else if (score >= 4) {
+      } else if (scoreRatio >= 0.4) {
         emoji = "🚀"; title = "Rising star!";
         copy = "Nice exploring! Every great astronaut keeps learning. Ready for another orbit?";
       } else {
@@ -696,9 +802,11 @@
     nextButton.addEventListener("click", () => {
       if (!answered) return;
       currentQuestion++;
-      if (currentQuestion === runQuestions.length) showResults();
+      if (currentQuestion === quizQuestions.length) showResults();
       else renderQuestion();
     });
+
+    startButton.addEventListener("click", startQuiz);
 
     function canUseQuizShortcut(event) {
       const target = event.target;
@@ -727,13 +835,10 @@
     });
 
     document.getElementById("restartButton").addEventListener("click", () => {
-      currentQuestion = 0;
-      score = 0;
-      missedAnswers = [];
-      shuffleQuestions();
       resultView.classList.add("hidden");
-      quizView.classList.remove("hidden");
-      renderQuestion();
+      quizView.classList.add("hidden");
+      startView.classList.remove("hidden");
+      document.querySelector('input[name="topic"]:checked').focus();
     });
 
     const themeToggle = document.getElementById("themeToggle");
@@ -755,8 +860,7 @@
       try { localStorage.setItem("orbit-quiz-theme", theme); } catch (error) { /* Theme still applies for this visit. */ }
     });
 
-    shuffleQuestions();
-    renderQuestion();
+    renderTopicOptions();
   </script>
 </body>
 </html>
