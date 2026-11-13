@@ -552,15 +552,28 @@
     let score = 0;
     let answered = false;
     let missedAnswers = [];
+    let runQuestions = [];
+
+    function shuffleQuestions() {
+      const previousRun = runQuestions;
+      runQuestions = [...questions];
+      for (let index = runQuestions.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [runQuestions[index], runQuestions[swapIndex]] = [runQuestions[swapIndex], runQuestions[index]];
+      }
+      if (runQuestions.length > 1 && runQuestions.every((question, index) => question === previousRun[index])) {
+        [runQuestions[0], runQuestions[1]] = [runQuestions[1], runQuestions[0]];
+      }
+    }
 
     function renderQuestion() {
-      const item = questions[currentQuestion];
+      const item = runQuestions[currentQuestion];
       answered = false;
-      questionCounter.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+      questionCounter.textContent = `Question ${currentQuestion + 1} of ${runQuestions.length}`;
       questionNumber.textContent = `QUESTION ${String(currentQuestion + 1).padStart(2, "0")}`;
-      scoreCounter.textContent = `${score} / ${questions.length}`;
+      scoreCounter.textContent = `${score} / ${runQuestions.length}`;
       questionText.textContent = item.question;
-      progressFill.style.width = `${(currentQuestion / questions.length) * 100}%`;
+      progressFill.style.width = `${(currentQuestion / runQuestions.length) * 100}%`;
       progressTrack.setAttribute("aria-valuenow", currentQuestion);
       feedback.className = "feedback";
       feedbackEmoji.textContent = "";
@@ -592,7 +605,7 @@
     function selectAnswer(selected, selectedButton) {
       if (answered) return;
       answered = true;
-      const item = questions[currentQuestion];
+      const item = runQuestions[currentQuestion];
       const choices = [...answersElement.querySelectorAll(".answer")];
       choices.forEach(button => { button.disabled = true; });
 
@@ -620,9 +633,9 @@
         feedbackText.textContent = `Not quite! ${item.fact}`;
       }
 
-      scoreCounter.textContent = `${score} / ${questions.length}`;
+      scoreCounter.textContent = `${score} / ${runQuestions.length}`;
       nextButton.disabled = false;
-      nextButton.innerHTML = currentQuestion === questions.length - 1
+      nextButton.innerHTML = currentQuestion === runQuestions.length - 1
         ? 'See my results <span aria-hidden="true">✨</span>'
         : 'Next question <span aria-hidden="true">→</span>';
     }
@@ -631,8 +644,8 @@
       quizView.classList.add("hidden");
       resultView.classList.remove("hidden");
       progressFill.style.width = "100%";
-      progressTrack.setAttribute("aria-valuenow", questions.length);
-      document.getElementById("resultScore").textContent = `${score} / ${questions.length}`;
+      progressTrack.setAttribute("aria-valuenow", runQuestions.length);
+      document.getElementById("resultScore").textContent = `${score} / ${runQuestions.length}`;
       const missedAnswerList = document.getElementById("missedAnswerList");
       const reviewEmpty = document.getElementById("reviewEmpty");
       missedAnswerList.replaceChildren();
@@ -662,7 +675,7 @@
       });
 
       let emoji, title, copy;
-      if (score === questions.length) {
+      if (score === runQuestions.length) {
         emoji = "🏆"; title = "Out-of-this-world!";
         copy = "A perfect mission! You're a true space expert. The cosmos has no secrets from you.";
       } else if (score >= 7) {
@@ -683,7 +696,7 @@
     nextButton.addEventListener("click", () => {
       if (!answered) return;
       currentQuestion++;
-      if (currentQuestion === questions.length) showResults();
+      if (currentQuestion === runQuestions.length) showResults();
       else renderQuestion();
     });
 
@@ -717,6 +730,7 @@
       currentQuestion = 0;
       score = 0;
       missedAnswers = [];
+      shuffleQuestions();
       resultView.classList.add("hidden");
       quizView.classList.remove("hidden");
       renderQuestion();
@@ -741,6 +755,7 @@
       try { localStorage.setItem("orbit-quiz-theme", theme); } catch (error) { /* Theme still applies for this visit. */ }
     });
 
+    shuffleQuestions();
     renderQuestion();
   </script>
 </body>
