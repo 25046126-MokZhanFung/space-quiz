@@ -615,6 +615,19 @@
     let activeTopic = "all";
     let quizQuestions = questions;
 
+    function shuffleQuestions(questionList, previousRun = [], random = Math.random) {
+      const shuffledQuestions = [...questionList];
+      for (let index = shuffledQuestions.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [shuffledQuestions[index], shuffledQuestions[swapIndex]] =
+          [shuffledQuestions[swapIndex], shuffledQuestions[index]];
+      }
+      if (shuffledQuestions.length > 1 && shuffledQuestions.every((question, index) => question === previousRun[index])) {
+        [shuffledQuestions[0], shuffledQuestions[1]] = [shuffledQuestions[1], shuffledQuestions[0]];
+      }
+      return shuffledQuestions;
+    }
+
     function renderTopicOptions() {
       Object.entries(topics).forEach(([value, topic]) => {
         const count = value === "all" ? questions.length : questions.filter(item => item.topic === value).length;
@@ -643,7 +656,7 @@
 
     function startQuiz() {
       activeTopic = document.querySelector('input[name="topic"]:checked').value;
-      quizQuestions = getQuestionsForTopic(activeTopic);
+      quizQuestions = shuffleQuestions(getQuestionsForTopic(activeTopic), quizQuestions);
       currentQuestion = 0;
       score = 0;
       missedAnswers = [];
