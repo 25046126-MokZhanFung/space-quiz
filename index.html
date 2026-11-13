@@ -353,6 +353,35 @@
     .result-score { margin: 13px 0 7px; color: var(--accent); font-family: "Space Grotesk", sans-serif; font-size: 44px; font-weight: 700; }
     .result-copy { max-width: 350px; margin: 0 auto 23px; color: var(--muted); font-size: 14px; line-height: 1.65; }
     .result .primary { margin: 0 auto; }
+    .answer-review {
+      margin: 22px 0;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      text-align: left;
+    }
+    .answer-review h3 { margin: 0 0 13px; font-size: 17px; }
+    .review-list { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; }
+    .review-item {
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+    }
+    .review-question { margin: 0 0 10px; font-size: 14px; line-height: 1.45; }
+    .review-item dl {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 6px 10px;
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .review-item dt { color: var(--muted); font-weight: 700; }
+    .review-item dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+    .review-empty { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
     .footer-note { margin: 15px 4px 0; color: var(--muted); text-align: center; font-size: 11px; }
     .sparkle { position: absolute; z-index: -1; color: var(--accent); opacity: .45; animation: twinkle 2.8s ease-in-out infinite; }
     .sparkle.one { top: 105px; left: -23px; font-size: 20px; }
@@ -431,6 +460,11 @@
         <h2 id="resultTitle">Cosmic explorer!</h2>
         <div class="result-score" id="resultScore">0 / 10</div>
         <p class="result-copy" id="resultCopy"></p>
+        <section class="answer-review" aria-labelledby="answerReviewTitle">
+          <h3 id="answerReviewTitle">Review your missed answers</h3>
+          <ol class="review-list" id="missedAnswerList"></ol>
+          <p class="review-empty" id="reviewEmpty" role="status">No missed answers this time!</p>
+        </section>
         <button class="primary" id="restartButton" type="button">Explore again <span aria-hidden="true">↻</span></button>
       </div>
     </section>
@@ -517,6 +551,7 @@
     let currentQuestion = 0;
     let score = 0;
     let answered = false;
+    let missedAnswers = [];
 
     function renderQuestion() {
       const item = questions[currentQuestion];
@@ -569,6 +604,12 @@
         feedbackEmoji.textContent = ["🚀", "🌟", "🪐", "🎉"][currentQuestion % 4];
         feedbackText.textContent = `Brilliant! ${item.fact}`;
       } else {
+        missedAnswers.push({
+          question: item.question,
+          selectedAnswer: item.answers[selected],
+          correctAnswer: item.answers[item.correct],
+          fact: item.fact
+        });
         selectedButton.classList.add("is-wrong");
         selectedButton.querySelector(".answer-mark").textContent = "×";
         const rightButton = choices[item.correct];
@@ -592,6 +633,33 @@
       progressFill.style.width = "100%";
       progressTrack.setAttribute("aria-valuenow", questions.length);
       document.getElementById("resultScore").textContent = `${score} / ${questions.length}`;
+      const missedAnswerList = document.getElementById("missedAnswerList");
+      const reviewEmpty = document.getElementById("reviewEmpty");
+      missedAnswerList.replaceChildren();
+      reviewEmpty.hidden = missedAnswers.length > 0;
+      missedAnswerList.hidden = missedAnswers.length === 0;
+
+      missedAnswers.forEach(missedAnswer => {
+        const listItem = document.createElement("li");
+        listItem.className = "review-item";
+        const question = document.createElement("h4");
+        question.className = "review-question";
+        question.textContent = missedAnswer.question;
+        const answers = document.createElement("dl");
+        [
+          ["Your answer", missedAnswer.selectedAnswer],
+          ["Correct answer", missedAnswer.correctAnswer],
+          ["Why", missedAnswer.fact]
+        ].forEach(([label, value]) => {
+          const term = document.createElement("dt");
+          term.textContent = label;
+          const description = document.createElement("dd");
+          description.textContent = value;
+          answers.append(term, description);
+        });
+        listItem.append(question, answers);
+        missedAnswerList.append(listItem);
+      });
 
       let emoji, title, copy;
       if (score === questions.length) {
@@ -648,6 +716,7 @@
     document.getElementById("restartButton").addEventListener("click", () => {
       currentQuestion = 0;
       score = 0;
+      missedAnswers = [];
       resultView.classList.add("hidden");
       quizView.classList.remove("hidden");
       renderQuestion();
