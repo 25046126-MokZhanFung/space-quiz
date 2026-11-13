@@ -323,6 +323,8 @@
       margin-top: 15px;
     }
 
+    .keyboard-hint { margin: 10px 0 0; color: var(--muted); text-align: center; font-size: 12px; }
+
     .primary {
       min-width: 133px;
       display: inline-flex;
@@ -417,6 +419,7 @@
           <span class="feedback-emoji" id="feedbackEmoji" aria-hidden="true"></span>
           <span id="feedbackText"></span>
         </div>
+        <p class="keyboard-hint">Press 1–4 to choose · Enter to continue</p>
         <div class="action-row">
           <button class="primary" id="nextButton" type="button" disabled>Choose an answer <span aria-hidden="true">→</span></button>
         </div>
@@ -614,6 +617,32 @@
       currentQuestion++;
       if (currentQuestion === questions.length) showResults();
       else renderQuestion();
+    });
+
+    function canUseQuizShortcut(event) {
+      const target = event.target;
+      if (!(target instanceof Element)) return false;
+      const control = target.closest("button, a[href], input, select, textarea, [contenteditable='true'], [role='button'], [tabindex]:not([tabindex='-1'])");
+      return !control || control === nextButton || control.classList.contains("answer");
+    }
+
+    document.addEventListener("keydown", event => {
+      if (!resultView.classList.contains("hidden") || !canUseQuizShortcut(event)) return;
+
+      if (/^[1-4]$/.test(event.key)) {
+        if (answered) return;
+        const selectedButton = answersElement.querySelectorAll(".answer")[Number(event.key) - 1];
+        if (selectedButton) {
+          event.preventDefault();
+          selectedButton.click();
+        }
+        return;
+      }
+
+      if (event.key === "Enter" && answered && !nextButton.disabled && event.target !== nextButton) {
+        event.preventDefault();
+        nextButton.click();
+      }
     });
 
     document.getElementById("restartButton").addEventListener("click", () => {
